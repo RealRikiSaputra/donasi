@@ -1,0 +1,21 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.jumbotron {
+  background: url("img/bg.jpg") no-repeat center center;
+  background-size: cover;
+  color: white;
+}
+
+.jumbotron h1 {
+  font-weight: bold;
+}
+
+footer {
+  background-color: #f8f9fa;
+}
+
+footer p {
+  margin: 0;
+}
