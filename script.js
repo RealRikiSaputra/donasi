@@ -2,7 +2,7 @@ $(document).ready(function () {
   const galleryContainer = $("#gallery-container");
 
   // URL JSON online
-  const jsonUrl = "https://json.link/hdoFmSGDrd.json"; // Ganti dengan URL JSON Anda
+  const jsonUrl = "https://json.link/hdoFmSGDrd.json";
 
   $.getJSON(jsonUrl, function (data) {
     data.images.forEach((image) => {
