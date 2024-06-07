@@ -19,6 +19,26 @@ if (isset($_SESSION['admin'])) {
             echo '<div style="text-align: center; background-color: #f2dede; color: #a94442; padding: 10px; border: 1px solid #ebccd1; margin-bottom: 15px;">Gagal menghapus pengguna. Pesan error: ' . htmlspecialchars($_GET['message']) . '</div>';
         }
     }
+
+    $sql = "SELECT keterangan, jumlah FROM transaksi";
+    $result = $koneksi->query($sql);
+
+    $totalPemasukan = 0;
+    $totalPengeluaran = 0;
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $ket = strtolower($row['keterangan']);
+            if ($ket == 'pemasukan') {
+                $totalPemasukan += $row['jumlah'];
+            } elseif ($ket == 'pengeluaran') {
+                $totalPengeluaran += $row['jumlah'];
+            }
+        }
+    }
+
+    $sisaUang = $totalPemasukan - $totalPengeluaran;
+
     $admin = $_SESSION['admin'];
     ?>
 
@@ -116,13 +136,44 @@ if (isset($_SESSION['admin'])) {
                 <main>
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Dashboard Admin</h1>
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <!-- <center>
-                                    <h1 id="balanceInfo">Saldo: <span id="balanceValue"></span></h1>
-                                </center> -->
+                        <div class="container mt-5">
+                            <div class="row">
+                                <div class="col-sm-4 mb-4">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body">
+                                            <center>
+                                                <h3>Pemasukan: Rp <?php echo number_format($totalPemasukan, 0, ',', '.'); ?>
+                                                </h3>
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 mb-4">
+                                    <div class="card bg-danger text-white">
+                                        <div class="card-body">
+                                            <center>
+                                                <h3>Pengeluaran: Rp
+                                                    <?php echo number_format($totalPengeluaran, 0, ',', '.'); ?>
+                                                </h3>
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 mb-4">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body">
+                                            <center>
+                                                <h3 id="balanceInfo">Sisa Uang: Rp <span
+                                                        id="balanceValue"><?php echo number_format($sisaUang, 0, ',', '.'); ?></span>
+                                                </h3>
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
+                            data-bs-target="#addDataModal">Tambah Data</button>
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
@@ -130,26 +181,88 @@ if (isset($_SESSION['admin'])) {
                             </div>
                             <div class="card-body">
                                 <?php
-                                // echo "<table id='datatablesSimple'>";
-                                // echo "<thead><tr><th>ID</th><th>Username</th><th>Tagihan</th><th>Reset Tagihan</th></tr></thead><tbody>";
-                            
-                                // while ($row = mysqli_fetch_assoc($result_users)) {
-                                //     $id = $row['id'];
-                                //     $username = $row['username'];
-                                //     $tagihan = $row['tagihan'];
-                            
-                                //     echo "<tr>";
-                                //     echo "<td>$id</td>";
-                                //     echo "<td>$username</td>";
-                                //     echo "<td>$tagihan</td>";
-                                //     echo "<td><a class='reset-link' href='reset_tagihan.php?id=$id'>Reset</a></td>";
-                                //     echo "</tr>";
-                                // }
-                            
-                                echo "</tbody></table>";
+                                $query = "SELECT * FROM transaksi";
+                                $result_data = mysqli_query($koneksi, $query);
+
+                                if ($result_data->num_rows > 0) {
+                                    echo "<table id='datatablesSimple' class='table'>";
+                                    echo "<thead>";
+                                    echo "<tr>";
+                                    echo "<th>Keterangan</th>";
+                                    echo "<th>Jumlah</th>";
+                                    echo "<th>Tanggal</th>";
+                                    echo "<th>Action</th>";
+                                    echo "</tr>";
+                                    echo "</thead>";
+                                    echo "<tbody>";
+                                    while ($row = $result_data->fetch_assoc()) {
+                                        echo "<tr>";
+                                        echo "<td>" . $row['keterangan'] . "</td>";
+                                        echo "<td>" . $row['jumlah'] . "</td>";
+                                        echo "<td>" . $row['tgl'] . "</td>";
+                                        echo '<td>
+                                                <a class="edit-link" href="edit-data.php?id=' . $row['id'] . '&jenis_post=data">Edit</a> |
+                                                <a class="reset-link" href="delete-data.php?id=' . $row['id'] . '&jenis_post=data">Delete</a>
+                                            </td>';
+                                        echo "</tr>";
+                                    }
+                                    echo "</tbody>";
+                                    echo "</table>";
+                                } else {
+                                    echo "Tidak ada data yang ditemukan.";
+                                }
                                 ?>
                             </div>
                         </div>
+
+                        <!-- Pop UP Modal Tambah -->
+                        <div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addDataModalLabel">Tambah Data Baru</h5>
+                                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Form tambah data disini -->
+                                        <form method="POST" action="add-data.php" enctype="multipart/form-data"
+                                            style="margin: 20px;">
+                                            <input type="hidden" name="jenis_post" value="data">
+
+                                            <div class="form-group" style="margin-bottom: 15px;">
+                                                <label for="ket"
+                                                    style="display: block; margin-bottom: 5px;">Keterangan</label>
+                                                <select class="form-control" id="ket" name="ket" style="width: 100%;">
+                                                    <option value="pengeluaran">Pengeluaran</option>
+                                                    <option value="pemasukan">Pemasukan</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" style="margin-bottom: 15px;">
+                                                <label for="jumlah"
+                                                    style="display: block; margin-bottom: 5px;">Jumlah</label>
+                                                <input type="number" class="form-control" id="jumlah" name="jumlah"
+                                                    style="width: 100%;" required>
+                                            </div>
+
+                                            <div class="form-group" style="margin-bottom: 15px;">
+                                                <label for="tanggal"
+                                                    style="display: block; margin-bottom: 5px;">Tanggal</label>
+                                                <input type="date" class="form-control" id="tanggal" name="tanggal"
+                                                    style="width: 100%;" required>
+                                            </div>
+
+                                            <button type="submit" class="btn btn-primary"
+                                                style="margin-top: 10px;">Simpan</button>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
@@ -167,6 +280,8 @@ if (isset($_SESSION['admin'])) {
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
             crossorigin="anonymous"></script>
         <script src="js/datatables-simple-demo.js"></script>
+
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
         <script>
             function logoutClick(event) {
                 event.preventDefault();
@@ -183,25 +298,72 @@ if (isset($_SESSION['admin'])) {
 
     </html>
     <?php
+    if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
+        echo "<script>
+            swal({
+                title: 'Sukses!',
+                text: 'Data berhasil disimpan!',
+                icon: 'success',
+                button: 'OK'
+            });
+         </script>";
+    } elseif (isset($_GET['error']) && $_GET['error'] == '1') {
+        echo "<script>
+            swal({
+                title: 'Gagal!',
+                text: 'Data gagal disimpan!',
+                icon: 'error',
+                button: 'OK'
+            });
+         </script>";
+    }elseif (isset($_GET['sukses']) && $_GET['sukses'] == '2') {
+        echo "<script>
+            swal({
+                title: 'Sukses!',
+                text: 'Data berhasil dihapus',
+                icon: 'success',
+                button: 'OK'
+            });
+         </script>";
+    } elseif (isset($_GET['error']) && $_GET['error'] == '2') {
+        echo "<script>
+            swal({
+                title: 'Gagal!',
+                text: 'Data gagal dihapus',
+                icon: 'error',
+                button: 'OK'
+            });
+         </script>";
+    } elseif (isset($_GET['sukses']) && $_GET['sukses'] == '4') {
+        echo "<script>
+            swal({
+                title: 'Sukses!',
+                text: 'Data berhasil di ubah',
+                icon: 'success',
+                button: 'OK'
+            });
+         </script>";
+    } elseif (isset($_GET['error']) && $_GET['error'] == '4') {
+        echo "<script>
+            swal({
+                title: 'Gagal!',
+                text: 'Data gagal di ubah',
+                icon: 'error',
+                button: 'OK'
+            });
+         </script>";
+    } elseif (isset($_GET['info'])) {
+        echo "<script>
+            swal({
+                title: 'Gagal!',
+                text: 'Gagal mendapatkan data',
+                icon: 'warning',
+                button: 'OK'
+            });
+         </script>";
+    }
 } else {
     header("Location: index.php");
     exit();
-}
-
-if (isset($_GET['status'])) {
-    $notificationStyle = 'text-align: center; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; position: absolute; top: 0; left: 50%; transform: translateX(-50%);';
-
-    if ($_GET['status'] == 'success') {
-        echo '<div style="' . $notificationStyle . ' color: green;">Update berhasil!</div>';
-    } elseif ($_GET['status'] == 'error') {
-        echo '<div style="' . $notificationStyle . ' color: red;">Update gagal. Pesan error: ' . htmlspecialchars($_GET['message']) . '</div>';
-    }
-}
-if (isset($_GET['status'])) {
-    if ($_GET['status'] == 'deletesuccess') {
-        echo '<div style="text-align: center; background-color: #dff0d8; color: #3c763d; padding: 10px; border: 1px solid #d6e9c6; margin-bottom: 15px;">Pengguna berhasil dihapus!</div>';
-    } elseif ($_GET['status'] == 'deleteerror') {
-        echo '<div style="text-align: center; background-color: #f2dede; color: #a94442; padding: 10px; border: 1px solid #ebccd1; margin-bottom: 15px;">Gagal menghapus pengguna. Pesan error: ' . htmlspecialchars($_GET['message']) . '</div>';
-    }
 }
 ?>

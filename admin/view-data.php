@@ -102,28 +102,13 @@ if (isset($_SESSION['admin'])) {
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <?php
-                        if (isset($_GET['status'])) {
-                            $notificationStyle = 'text-align: center; background-color: #f0f0f0; padding: 10px; border: 1px solid #ccc; position: absolute; top: 0; left: 50%; transform: translateX(-50%);';
-
-                            if ($_GET['status'] == 'success') {
-                                echo '<div style="' . $notificationStyle . ' color: green;">Update berhasil!</div>';
-                            } elseif ($_GET['status'] == 'error') {
-                                echo '<div style="' . $notificationStyle . ' color: red;">Update gagal. Pesan error: ' . htmlspecialchars($_GET['message']) . '</div>';
-                            } elseif ($_GET['status'] == 'deletesuccess') {
-                                echo '<div style="text-align: center; background-color: #dff0d8; color: #3c763d; padding: 10px; border: 1px solid #d6e9c6; margin-bottom: 15px;">Pengguna berhasil dihapus!</div>';
-                            } elseif ($_GET['status'] == 'deleteerror') {
-                                echo '<div style="text-align: center; background-color: #f2dede; color: #a94442; padding: 10px; border: 1px solid #ebccd1; margin-bottom: 15px;">Gagal menghapus pengguna. Pesan error: ' . htmlspecialchars($_GET['message']) . '</div>';
-                            }
-                        }
-                        ?>
-                        <h1 class="mt-4">View Admin</h1>
+                        <h1 class="mt-4">View Data</h1>
                         <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal"
                             data-bs-target="#addDataModal">Tambah Data</button>
                         <div class="card mb-4">
                             <div class="card-header">
                                 <i class="fas fa-table me-1"></i>
-                                Admin
+                                Data
                             </div>
                             <div class="card-body">
                                 <?php
@@ -137,8 +122,9 @@ if (isset($_SESSION['admin'])) {
                     <td style="text-align: center;"> <img src="../assets/' . $row['foto'] . '" alt="Foto Hewan" style="width: 80px; height: 80px; object-fit: cover; margin: auto;">
                     <td>' . $row['keterangan'] . '</td>
                     <td>
-                        <a class="edit-link" href="edit-data.php?page=edit_user&id=' . $row['id'] . '">Edit</a> |
-                        <a class="reset-link" href="delete-data.php?id=' . $row['id'] . '">Delete</a>
+                    
+                        <a class="edit-link" href="edit-data.php?id=' . $row['id'] . '&jenis_post=galery">Edit</a> |
+                        <a class="reset-link" href="delete-data.php?id=' . $row['id'] . '&jenis_post=galery">Delete</a>
                     </td>
                 </tr>';
                                     }
@@ -168,7 +154,7 @@ if (isset($_SESSION['admin'])) {
                                         <!-- Form tambah data disini -->
                                         <form method="POST" action="add-data.php" enctype="multipart/form-data"
                                             style="margin: 20px;">
-                                            <input type="hidden" name="jenis_post" value="induk_utama">
+                                            <input type="hidden" name="jenis_post" value="galery">
 
                                             <div class="form-group" style="margin-bottom: 15px;">
                                                 <label for="foto" style="display: block; margin-bottom: 5px;">Foto</label>

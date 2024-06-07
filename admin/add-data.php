@@ -3,23 +3,40 @@ session_start();
 include '../koneksi.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $ket = $_POST['ket'];
+    $jenis_post = $_POST['jenis_post'];
 
+    if ($jenis_post == 'data') {
+        $ket = $_POST['ket'];
+        $jumlah = $_POST['jumlah'];
+        $tanggal = $_POST['tanggal'];
 
-    $foto = upload();
+        $query = "INSERT INTO transaksi (keterangan, jumlah, tgl) 
+                  VALUES ('$ket', '$jumlah', '$tanggal')";
 
-    if (!$foto) {
-        $foto = NULL;
-    }
+        if (mysqli_query($koneksi, $query)) {
+            header("Location: dashboard.php?sukses=1");
+        } else {
+            header("Location: dashboard.php?error=1");
+        }
+    } elseif ($jenis_post == 'galery') {
+        $keterangan = $_POST['ket'];
 
-    $query = "INSERT INTO assets (foto, keterangan) 
-    VALUES ('$foto', '$ket')";
+        $foto = upload();
 
+        if (!$foto) {
+            $foto = NULL;
+        }
 
-    if (mysqli_query($koneksi, $query)) {
-        header("Location: view-data.php?sukses=1");
+        $query = "INSERT INTO assets (foto, keterangan) 
+                  VALUES ('$foto', '$keterangan')";
+
+        if (mysqli_query($koneksi, $query)) {
+            header("Location: view-data.php?sukses=1");
+        } else {
+            header("Location: view-data.php?error=1");
+        }
     } else {
-        header("Location: view-data.php?error=1");
+        echo "Jenis post tidak valid!";
     }
 } else {
     echo "Metode request tidak valid!";
